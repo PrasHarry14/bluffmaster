@@ -1,2 +1,0 @@
-# bluff
-software devops project
