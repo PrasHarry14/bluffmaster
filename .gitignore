@@ -1,0 +1,4 @@
+/bluffmaster
+*.o
+.DS_Store
+*.swp
