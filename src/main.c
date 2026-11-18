@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
 #define DECK_SIZE 52
 typedef struct{ //we're talking abt one playing card here
     int rank; //ACE=1,NORMAL=2-10,JACK=11,QUEEN=12,KING=13
@@ -14,6 +16,15 @@ void initializeDeck(Card deck[]) {
         }
     }
 }
+void shuffleDeck(Card deck[]){
+    for(int i=DECK_SIZE-1;i>0;i--){
+        int j=rand()%(i+1);
+        Card Temp=deck[i];
+        deck[i]=deck[j];
+        deck[j]=Temp;
+
+    }
+}
 void printCard(Card card){
     char *suits[] = {"Hearts", "Diamonds", "Clubs", "Spades"};
     char *ranks[] = {"Ace", "2", "3", "4", "5", "6", "7","8", "9", "10", "Jack", "Queen", "King" };
@@ -25,12 +36,15 @@ void printDeck(Card deck[]) {
     }
 }
 int main(void){
+    srand((unsigned int)time(NULL));
+    printf("Welcome to BLUFF MASTER!\n");
     Card deck[DECK_SIZE];
-    printf("Welcome to Bluff Master!\n");
-    printf("Initializing deck...\n\n");
     initializeDeck(deck);
-    printf("Deck successfully created!\n");
-    printf("Total cards: %d\n\n", DECK_SIZE);
-    printDeck(deck); 
+    printf("\nOriginal deck:\n");
+    printDeck(deck);
+    shuffleDeck(deck);
+    printf("\nShuffled deck:\n");
+    printDeck(deck);
     return 0;
 }
+
