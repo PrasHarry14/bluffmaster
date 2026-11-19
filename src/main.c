@@ -2,6 +2,8 @@
 #include<stdlib.h>
 #include<time.h>
 #define DECK_SIZE 52
+#define PLAYERS 4
+#define CARDS_PER_PLAYERS 13
 typedef struct{ //we're talking abt one playing card here
     int rank; //ACE=1,NORMAL=2-10,JACK=11,QUEEN=12,KING=13
     int suit; //HEARTS=0,DIAMONDS=1,CLUBS=2,SPADES=3
@@ -25,6 +27,21 @@ void shuffleDeck(Card deck[]){
 
     }
 }
+void dealCards(Card deck[],Card hands[PLAYERS][CARDS_PER_PLAYERS]){
+    int index=0;
+    for(int player=0;player<PLAYERS;player++){
+        for(int card=0;card<CARDS_PER_PLAYERS;card++){
+            hands[player][card]=deck[index];
+            index++;
+
+
+
+        }
+
+
+    }
+
+}
 void printCard(Card card){
     char *suits[] = {"Hearts", "Diamonds", "Clubs", "Spades"};
     char *ranks[] = {"Ace", "2", "3", "4", "5", "6", "7","8", "9", "10", "Jack", "Queen", "King" };
@@ -36,15 +53,31 @@ void printDeck(Card deck[]) {
     }
 }
 int main(void){
+    Card deck[DECK_SIZE];
+    Card hands[PLAYERS][CARDS_PER_PLAYERS];
+    const char *players[PLAYERS]={"YOU","HARVEY","MIKE","JOE"};
+
     srand((unsigned int)time(NULL));
     printf("Welcome to BLUFF MASTER!\n");
-    Card deck[DECK_SIZE];
     initializeDeck(deck);
-    printf("\nOriginal deck:\n");
-    printDeck(deck);
+    printf("\n52 cards successfully created!\n");
     shuffleDeck(deck);
-    printf("\nShuffled deck:\n");
-    printDeck(deck);
+    printf("Deck shuffled successfully!\n");
+    dealCards(deck, hands);
+    printf("Cards dealt successfully!\n");
+     for (int player = 0; player < PLAYERS; player++) {
+
+        printf("\n-----------------------------\n");
+        printf("%s's cards:\n", players[player]);
+        printf("-----------------------------\n");
+
+        for (int card = 0; card < CARDS_PER_PLAYERS; card++) {
+            printCard(hands[player][card]);
+        }
+    }
+
+    printf("\nAll 52 cards have been distributed!\n");
+
     return 0;
 }
 
