@@ -15,6 +15,16 @@ typedef struct{
     int cardCount;
 }Player;
 
+typedef struct {
+    Card pile[DECK_SIZE];
+    int pileCount;
+    int currentPlayer;
+    int currentRank;
+    int lastPlayer;
+    int lastPlayCount;
+} Game;
+
+
 void initializeDeck(Card deck[]) {
     int index=0;
     for(int suit=0;suit<4;suit++){
@@ -81,6 +91,56 @@ void printCard(Card card){
     printf("%s of %s\n", ranks[card.rank-1],suits[card.suit]);
 }
 
+const char *rankName(int rank) {
+    static const char *names[] = {
+        "Ace", "2", "3", "4", "5", "6", "7",
+        "8", "9", "10", "Jack", "Queen", "King"
+    };
+    if (rank < 1 || rank > 13) {
+        return "Invalid";
+    }
+    return names[rank - 1];
+}
+void startRound(Game*game,Player players[]){
+    int chosenRank;
+    printf("\n=== NEW ROUND ===\n");
+    printf("%s is starting this round!\n",
+           players[game->currentPlayer].name);
+
+    if (game->currentPlayer == 0) {
+        do {
+            printf("Choose a rank (1-13): ");
+
+            if (scanf("%d", &chosenRank) != 1) {
+                printf("Please enter a number.\n");
+
+                int ch;
+                while ((ch = getchar()) != '\n' && ch != EOF) {
+                }
+
+                chosenRank = 0;
+                continue;
+            }
+
+            if (chosenRank < 1 || chosenRank > 13) {
+                printf("Invalid rank! Choose between 1 and 13.\n");
+            }
+
+        } while (chosenRank < 1 || chosenRank > 13);
+    } else {
+        chosenRank = rand() % 13 + 1;
+    }
+
+    game->currentRank = chosenRank;
+    game->lastPlayer = -1;
+    game->lastPlayCount = 0;
+
+    printf("%s chose %s!\n",
+           players[game->currentPlayer].name,
+           rankName(game->currentRank));
+}
+
+
 
 int main(void){
     Card deck[DECK_SIZE];
@@ -90,6 +150,13 @@ int main(void){
     {"MIKE",{{0}},0},
     {"JOE",{{0}},0}
 };
+    Game game = {
+        .pileCount = 0,
+        .currentPlayer = 0,
+        .currentRank = 0,
+        .lastPlayer = -1,
+        .lastPlayCount = 0
+    };
 
     srand((unsigned int)time(NULL));
     printf("Welcome to BLUFF MASTER!\n");
@@ -110,33 +177,19 @@ int main(void){
         }
     }
 
-printf("\n=== TESTING CARD REMOVAL ===\n");
+printf("\n=== GAME STATE ===\n");
+printf("Current player: %s\n", players[game.currentPlayer].name);
+printf("Current rank: %d\n", game.currentRank);
+printf("Cards in pile: %d\n", game.pileCount);
+printf("Last player: %d\n", game.lastPlayer);
+printf("Last play count: %d\n", game.lastPlayCount);
+startRound(&game, players);
 
-printf("Before removal: %d cards\n", players[0].cardCount);
+printf("\n=== UPDATED GAME STATE ===\n");
+printf("Current player: %s\n", players[game.currentPlayer].name);
+printf("Current rank: %s\n", rankName(game.currentRank));
+printf("Cards in pile: %d\n", game.pileCount);
 
-if (removeCard(&players[0], 2)) {
-    printf("Card at index 2 removed successfully!\n");
-} else {
-    printf("Invalid card index!\n");
-}
-
-printf("After removal: %d cards\n", players[0].cardCount);
-
-printf("\nYOU's updated hand:\n");
-
-for (int i = 0; i < players[0].cardCount; i++) {
-    printCard(players[0].hand[i]);
-}
-
-printf("\n=== TESTING TURN ROTATION ===\n");
-
-int currentPlayer = 0;
-
-for (int turn = 1; turn <= 8; turn++) {
-    printf("Turn %d: %s\n", turn, players[currentPlayer].name);
-
-    currentPlayer = nextPlayer(currentPlayer);
-}
     return 0;
 }
 
