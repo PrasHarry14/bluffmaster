@@ -55,6 +55,9 @@ int removeCard(Player *player, int index){
     return 1;
 
 }
+int nextPlayer(int currentPlayer){
+    return (currentPlayer + 1) % PLAYERS;
+}
 void dealCards(Card deck[], Player players[]){
     int index = 0;
 
@@ -125,7 +128,15 @@ for (int i = 0; i < players[0].cardCount; i++) {
     printCard(players[0].hand[i]);
 }
 
+printf("\n=== TESTING TURN ROTATION ===\n");
 
+int currentPlayer = 0;
+
+for (int turn = 1; turn <= 8; turn++) {
+    printf("Turn %d: %s\n", turn, players[currentPlayer].name);
+
+    currentPlayer = nextPlayer(currentPlayer);
+}
     return 0;
 }
 
