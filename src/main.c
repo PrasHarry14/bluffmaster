@@ -42,6 +42,18 @@ int addCard(Player *Player, Card card){
     Player->cardCount++;
 
     return 1;
+
+}
+int removeCard(Player *player, int index){
+    if(index<0 || index>=player->cardCount){
+        return 0;
+    }
+    for (int i = index; i < player->cardCount - 1; i++) {
+        player->hand[i] = player->hand[i + 1];
+    }
+    player->cardCount--;
+    return 1;
+
 }
 void dealCards(Card deck[], Player players[]){
     int index = 0;
@@ -94,6 +106,25 @@ int main(void){
             printCard(players[player].hand[card]);
         }
     }
+
+printf("\n=== TESTING CARD REMOVAL ===\n");
+
+printf("Before removal: %d cards\n", players[0].cardCount);
+
+if (removeCard(&players[0], 2)) {
+    printf("Card at index 2 removed successfully!\n");
+} else {
+    printf("Invalid card index!\n");
+}
+
+printf("After removal: %d cards\n", players[0].cardCount);
+
+printf("\nYOU's updated hand:\n");
+
+for (int i = 0; i < players[0].cardCount; i++) {
+    printCard(players[0].hand[i]);
+}
+
 
     return 0;
 }
