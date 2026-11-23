@@ -444,6 +444,31 @@ void callBluff(Game *game, Player players[], int challenger) {
            players[winner].name);
 }
 
+int shouldCallBluff(Game *game, int playerIndex) {
+
+    // Nobody can challenge before someone plays
+    if (game->lastPlayer == -1 || game->lastPlayCount == 0) {
+        return 0;
+    }
+
+    // A player cannot challenge themselves
+    if (game->lastPlayer == playerIndex) {
+        return 0;
+    }
+
+    int chance;
+
+    if (playerIndex == 1) {
+        chance = 35;  // HARVEY
+    } else if (playerIndex == 2) {
+        chance = 15;  // MIKE
+    } else {
+        chance = 25;  // JOE
+    }
+
+    return (rand() % 100) < chance;
+}
+
 
 
 
@@ -473,41 +498,171 @@ int main(void){
     dealCards(deck, players);
     printf("Cards dealt successfully!\n");
     showHand(&players[0]);
+    
+while (1) {
 
-printf("\n=== GAME STATE ===\n");
-printf("Current player: %s\n", players[game.currentPlayer].name);
-printf("Current rank: %d\n", game.currentRank);
-printf("Cards in pile: %d\n", game.pileCount);
-printf("Last player: %d\n", game.lastPlayer);
-printf("Last play count: %d\n", game.lastPlayCount);
-startRound(&game, players);
-printf("\n=== UPDATED GAME STATE ===\n");
-printf("Current player: %s\n", players[game.currentPlayer].name);
-printf("Current rank: %s\n", rankName(game.currentRank));
-printf("Cards in pile: %d\n", game.pileCount);
+    // STEP 1: Check whether someone played their last card
+    if (game.lastPlayer != -1 &&
+        players[game.lastPlayer].cardCount == 0) {
 
+        int possibleWinner = game.lastPlayer;
+        int challenger = game.currentPlayer;
+        int challenge = 0;
 
-playCards(&game, players);
+        printf("\n============================\n");
+        printf("    FINAL CARD PLAYED!\n");
+        printf("============================\n");
 
-printf("\n=== COMPUTER TURNS ===\n");
+        printf("%s has no cards left!\n",
+               players[possibleWinner].name);
 
-for (int i = 0; i < 3; i++) {
-    computerPlay(&game, players);
+        // If YOU are the next player, choose
+        if (challenger == 0) {
+
+            int choice;
+
+            while (1) {
+                printf("\n1. Accept the play\n");
+                printf("2. Call BLUFF on %s\n",
+                       players[possibleWinner].name);
+                printf("Your choice: ");
+
+                if (scanf("%d", &choice) != 1) {
+                    int ch;
+                    while ((ch = getchar()) != '\n' &&
+                           ch != EOF) {
+                    }
+
+                    printf("Enter 1 or 2.\n");
+                    continue;
+                }
+
+                if (choice == 1 || choice == 2) {
+                    challenge = (choice == 2);
+                    break;
+                }
+
+                printf("Enter 1 or 2.\n");
+            }
+
+        } else {
+
+            // Computer decides whether to challenge
+            challenge = shouldCallBluff(&game, challenger);
+
+            if (challenge) {
+                printf("%s decides to challenge!\n",
+                       players[challenger].name);
+            } else {
+                printf("%s accepts the play.\n",
+                       players[challenger].name);
+            }
+        }
+
+        // STEP 2: Resolve the final challenge
+        if (challenge) {
+
+            callBluff(&game, players, challenger);
+
+            // If the accused still has zero cards,
+            // the challenge was unsuccessful
+            if (players[possibleWinner].cardCount == 0) {
+
+                printf("\n============================\n");
+                printf("        GAME OVER!\n");
+                printf("============================\n");
+
+                printf("%s WINS BLUFF MASTER!\n",
+                       players[possibleWinner].name);
+
+                break;
+            }
+
+            // Bluff was caught: player collected pile
+            printf("\nThe game continues!\n");
+            continue;
+        }
+
+        // STEP 3: Nobody challenged the final play
+        printf("\n============================\n");
+        printf("        GAME OVER!\n");
+        printf("============================\n");
+
+        printf("%s WINS BLUFF MASTER!!! CONGRATLUATIONS, YOU ARE THE ULTIMATE BLUFF MASTER!!\n",
+               players[possibleWinner].name);
+
+        break;
+    }
+
+    // STEP 4: Start a new round when necessary
+    if (game.currentRank == 0) {
+        startRound(&game, players);
+    }
+
+    // STEP 5: HUMAN TURN
+    if (game.currentPlayer == 0) {
+
+        printf("\n========================\n");
+        printf("       YOUR TURN\n");
+        printf("========================\n");
+
+        printf("Current rank: %s\n",
+               rankName(game.currentRank));
+
+        printf("Cards in pile: %d\n",
+               game.pileCount);
+
+        if (game.lastPlayer == -1) {
+
+            playCards(&game, players);
+
+        } else {
+
+            int choice;
+
+            printf("\n1. Play cards\n");
+            printf("2. Call BLUFF on %s\n",
+                   players[game.lastPlayer].name);
+
+            printf("Your choice: ");
+
+            if (scanf("%d", &choice) != 1) {
+
+                int ch;
+                while ((ch = getchar()) != '\n' &&
+                       ch != EOF) {
+                }
+
+                printf("Invalid input. Enter 1 or 2.\n");
+                continue;
+            }
+
+            if (choice == 1) {
+                playCards(&game, players);
+            } else if (choice == 2) {
+                callBluff(&game, players, 0);
+            } else {
+                printf("Please choose 1 or 2.\n");
+            }
+        }
+    }
+
+    // STEP 6: COMPUTER TURN
+    else {
+
+        int computer = game.currentPlayer;
+
+        if (shouldCallBluff(&game, computer)) {
+
+            callBluff(&game, players, computer);
+
+        } else {
+
+            computerPlay(&game, players);
+        }
+    }
 }
 
-printf("\n=== AFTER ALL FOUR PLAYERS ===\n");
-printf("Next player: %s\n", players[game.currentPlayer].name);
-printf("Cards in pile: %d\n", game.pileCount);
-
-
-printf("\n=== TESTING BLUFF CHALLENGE ===\n");
-callBluff(&game, players, 0);
-
-printf("\n=== AFTER CHALLENGE ===\n");
-printf("Next round starter: %s\n",
-       players[game.currentPlayer].name);
-printf("Cards in pile: %d\n", game.pileCount);
-printf("Current rank: %d\n", game.currentRank);
 
 return 0;
 }
